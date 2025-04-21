@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "components/alert/alert.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "MyAlert",
+          "tagName": "my-alert",
+          "cssParts": [
+            {
+              "description": "The component's base wrapper.",
+              "name": "base"
+            },
+            {
+              "description": "The component's icon.",
+              "name": "icon"
+            }
+          ],
+          "slots": [
+            {
+              "description": "The alert's main content.",
+              "name": ""
+            },
+            {
+              "description": "The alert's header.",
+              "name": "header"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "host",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "translations",
+              "type": {
+                "text": "Translations"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "base",
+              "type": {
+                "text": "HTMLElement"
+              }
+            }
+          ],
+          "events": [
+            {
+              "description": "Emitted when the alert opens.",
+              "name": "my-show",
+              "type": {
+                "text": "AlertEvent"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Indicates whether or not the alert is open. You can toggle this attribute to show and hide the alert, or you can\nuse the `show()` and `hide()` methods and this attribute will reflect the alert's open state.",
+              "fieldName": "open"
+            },
+            {
+              "name": "closable",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Enables a close button that allows the user to dismiss the alert.",
+              "fieldName": "closable"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'primary' | 'success' | 'neutral' | 'warning' | 'danger'"
+              },
+              "default": "'primary'",
+              "description": "The alert's theme variant.",
+              "fieldName": "variant"
+            },
+            {
+              "name": "duration",
+              "default": "Infinity",
+              "description": "The length of time, in milliseconds, the alert will show before closing itself. If the user interacts with\nthe alert before it closes (e.g. moves the mouse over it), the timer will restart. Defaults to `Infinity`, meaning\nthe alert will not close on its own.",
+              "fieldName": "duration"
+            },
+            {
+              "name": "countdown",
+              "type": {
+                "text": "'rtl' | 'ltr' | undefined"
+              },
+              "description": "Enables a countdown that indicates the remaining time the alert will be displayed.\nTypically used to indicate the remaining time before a whole app refresh.",
+              "fieldName": "countdown"
+            }
+          ],
+          "superclass": {
+            "name": "MyElement",
+            "module": "/src/internal/my-element.js"
+          },
+          "summary": "Alerts are used to display important messages inline or as toast notifications.",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "name": "MyAlert",
+            "module": "components/alert/alert.js"
+          }
+        }
+      ]
+    }
+  ],
+  "package": {
+    "name": "@test/test",
+    "description": "A test CEM.",
+    "version": "1.0.0",
+    "author": "CTest",
+    "homepage": "test.com",
+    "license": "MIT"
+  }
+}
