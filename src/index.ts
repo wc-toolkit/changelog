@@ -17,6 +17,33 @@ export type CemChangelogConfig = {
 
 export type ChangeLevel = "breaking" | "feature" | "patch" | "none";
 
+export type ChangeMetadata = {
+  api: string;
+  changeType:
+    | "type"
+    | "defaultValue"
+    | "deprecation"
+    | "name"
+    | "modulePath"
+    | "definitionPath"
+    | "typeDefinitionPath"
+    | "added"
+    | "removed";
+  name?: string;
+  oldValue?: any;
+  newValue?: any;
+};
+
+export type NaturalLanguageChangeList = {
+  breakingChanges: Record<string, string[]>;
+  featureChanges: Record<string, string[]>;
+};
+
+export type RawDataChangeList = {
+  breakingChanges: Record<string, ChangeMetadata[]>;
+  featureChanges: Record<string, ChangeMetadata[]>;
+};
+
 const defaultConfig: CemChangelogConfig = {
   typeSrc: "parsedType",
 };
@@ -27,6 +54,10 @@ export class CemChangelog {
   private breakingChanges: Record<string, string[]> = {};
   private featureChanges: Record<string, string[]> = {};
   private config: CemChangelogConfig = defaultConfig;
+  private jsonChanges: RawDataChangeList = {
+    breakingChanges: {},
+    featureChanges: {},
+  };
 
   private _changes = {
     breaking: false,
@@ -46,8 +77,11 @@ export class CemChangelog {
     this.cleanupEmptyChangeLists();
 
     return {
-      breakingChanges: this.breakingChanges,
-      featureChanges: this.featureChanges,
+      changelog: {
+        breakingChanges: this.breakingChanges,
+        featureChanges: this.featureChanges,
+      },
+      rawData: this.jsonChanges,
     };
   }
 
@@ -58,6 +92,16 @@ export class CemChangelog {
           delete changeList[componentTag];
         }
       });
+    });
+    Object.keys(this.jsonChanges.breakingChanges).forEach((componentTag) => {
+      if (this.jsonChanges.breakingChanges[componentTag].length === 0) {
+        delete this.jsonChanges.breakingChanges[componentTag];
+      }
+    });
+    Object.keys(this.jsonChanges.featureChanges).forEach((componentTag) => {
+      if (this.jsonChanges.featureChanges[componentTag].length === 0) {
+        delete this.jsonChanges.featureChanges[componentTag];
+      }
     });
   }
 
@@ -122,6 +166,8 @@ export class CemChangelog {
       const newComponent = this.newComponents.get(tagName);
       this.breakingChanges[tagName] = [];
       this.featureChanges[tagName] = [];
+      this.jsonChanges.breakingChanges[tagName] = [];
+      this.jsonChanges.featureChanges[tagName] = [];
 
       this.checkComponentLevelChanges(oldComponent, newComponent);
       this.checkCssVariables(oldComponent, newComponent);
@@ -142,10 +188,20 @@ export class CemChangelog {
       ) || [];
 
     missingComponents.forEach((tagName) => {
-      this.breakingChanges[tagName] = [];
+      if (!this.breakingChanges[tagName]) {
+        this.breakingChanges[tagName] = [];
+      }
       this.breakingChanges[tagName].push(
         `This component has been removed in the new manifest.`
       );
+      if (!this.jsonChanges.breakingChanges[tagName]) {
+        this.jsonChanges.breakingChanges[tagName] = [];
+      }
+      this.jsonChanges.breakingChanges[tagName].push({
+        api: "component",
+        changeType: "removed",
+        name: this.oldComponents.get(tagName)?.name,
+      });
       this._changes.breaking = true;
     });
   }
@@ -155,10 +211,20 @@ export class CemChangelog {
       (tagName) => !this.oldComponents.has(tagName)
     );
     addedComponents.forEach((tagName) => {
-      this.featureChanges[tagName] = [];
+      if (!this.featureChanges[tagName]) {
+        this.featureChanges[tagName] = [];
+      }
       this.featureChanges[tagName].push(
         `This component has been added in the new manifest.`
       );
+      if (!this.jsonChanges.featureChanges[tagName]) {
+        this.jsonChanges.featureChanges[tagName] = [];
+      }
+      this.jsonChanges.featureChanges[tagName].push({
+        api: "component",
+        changeType: "added",
+        name: this.newComponents.get(tagName)?.name,
+      });
       this._changes.feature = true;
     });
   }
@@ -175,6 +241,15 @@ export class CemChangelog {
       this.breakingChanges[newComponent.tagName || "MissingTag"].push(
         `The class name has changed from \`${oldComponent.name}\` to \`${newComponent.name}\`.`
       );
+      this.jsonChanges.breakingChanges[
+        newComponent.tagName || "MissingTag"
+      ].push({
+        api: "component",
+        changeType: "name",
+        name: newComponent.tagName || "MissingTag",
+        oldValue: oldComponent.name,
+        newValue: newComponent.name,
+      });
       this._changes.breaking = true;
     }
 
@@ -182,6 +257,15 @@ export class CemChangelog {
       this.breakingChanges[newComponent.tagName || "MissingTag"].push(
         `The module path has changed to "${newComponent.modulePath}".`
       );
+      this.jsonChanges.breakingChanges[
+        newComponent.tagName || "MissingTag"
+      ].push({
+        api: "component",
+        changeType: "modulePath",
+        name: newComponent.tagName || "MissingTag",
+        oldValue: oldComponent.modulePath,
+        newValue: newComponent.modulePath,
+      });
       this._changes.breaking = true;
     }
 
@@ -189,6 +273,15 @@ export class CemChangelog {
       this.breakingChanges[newComponent.tagName || "MissingTag"].push(
         `The definition path where this is defined has changed to "${newComponent.definitionPath}".`
       );
+      this.jsonChanges.breakingChanges[
+        newComponent.tagName || "MissingTag"
+      ].push({
+        api: "component",
+        changeType: "definitionPath",
+        name: newComponent.tagName || "MissingTag",
+        oldValue: oldComponent.definitionPath,
+        newValue: newComponent.definitionPath,
+      });
       this._changes.breaking = true;
     }
 
@@ -196,6 +289,15 @@ export class CemChangelog {
       this.breakingChanges[newComponent.tagName || "MissingTag"].push(
         `The type path has changed to "${newComponent.typeDefinitionPath}".`
       );
+      this.jsonChanges.breakingChanges[
+        newComponent.tagName || "MissingTag"
+      ].push({
+        api: "component",
+        changeType: "typeDefinitionPath",
+        name: newComponent.tagName || "MissingTag",
+        oldValue: oldComponent.typeDefinitionPath,
+        newValue: newComponent.typeDefinitionPath,
+      });
       this._changes.breaking = true;
     }
 
@@ -204,6 +306,13 @@ export class CemChangelog {
       this.featureChanges[componentTag].push(
         `The deprecation statues has changed.${this.getDeprecationMessage(newComponent.deprecated)}`
       );
+      this.jsonChanges.featureChanges[componentTag].push({
+        api: "component",
+        changeType: "deprecation",
+        name: componentTag,
+        oldValue: oldComponent.deprecated,
+        newValue: newComponent.deprecated,
+      });
       this._changes.feature = true;
     }
   }
@@ -223,7 +332,7 @@ export class CemChangelog {
       oldCssVariables,
       newCssVariables,
       newComponent.tagName || "MissingTag",
-      "CSS variables",
+      "CSS variables"
     );
   }
 
@@ -279,7 +388,7 @@ export class CemChangelog {
       oldAttributes,
       newAttributes,
       newComponent.tagName || "MissingTag",
-      "attributes",
+      "attributes"
     );
   }
 
@@ -298,7 +407,7 @@ export class CemChangelog {
       oldEvents,
       newEvents,
       newComponent.tagName || "MissingTag",
-      "events",
+      "events"
     );
   }
 
@@ -317,7 +426,7 @@ export class CemChangelog {
       oldMethods,
       newMethods,
       newComponent.tagName || "MissingTag",
-      "methods",
+      "methods"
     );
   }
 
@@ -336,7 +445,7 @@ export class CemChangelog {
       oldProperties,
       newProperties,
       newComponent.tagName || "MissingTag",
-      "properties",
+      "properties"
     );
   }
 
@@ -363,7 +472,7 @@ export class CemChangelog {
     oldItems: T[],
     newItems: T[],
     componentTag: string = "MissingTag",
-    itemType: string,
+    itemType: string
   ): void {
     const oldItemNames = new Set(oldItems.map((item) => item.name));
     const newItemNames = new Set(newItems.map((item) => item.name));
@@ -379,6 +488,13 @@ export class CemChangelog {
           .map((item) => `\`${item.name}\``)
           .join(", ")}`
       );
+      addedItems.forEach((item) => {
+        this.jsonChanges.featureChanges[componentTag].push({
+          api: itemType,
+          changeType: "added",
+          name: item.name,
+        });
+      });
       this._changes.feature = true;
     }
 
@@ -388,6 +504,13 @@ export class CemChangelog {
           .map((item) => `\`${item.name}\``)
           .join(", ")}`
       );
+      removedItems.forEach((item) => {
+        this.jsonChanges.breakingChanges[componentTag].push({
+          api: itemType,
+          changeType: "removed",
+          name: item.name,
+        });
+      });
       this._changes.breaking = true;
     }
 
@@ -400,29 +523,56 @@ export class CemChangelog {
       const oldType = this.getTypeText(oldItem);
       const newType = this.getTypeText(newItem);
 
-
       if (oldItem.deprecated !== newItem.deprecated) {
         this.featureChanges[componentTag].push(
           `The deprecation status for ${itemType} "${newItem.name}" has changed.${this.getDeprecationMessage(newItem.deprecated)}`
         );
+        this.jsonChanges.featureChanges[componentTag].push({
+          api: itemType,
+          changeType: "deprecation",
+          name: newItem.name,
+          oldValue: oldItem.deprecated,
+          newValue: newItem.deprecated,
+        });
         this._changes.feature = true;
       }
       if (oldItem.default !== newItem.default) {
         this.getDefaultValueDiffLevel()[componentTag].push(
           `The default value for ${itemType} "${newItem.name}" has changed from \`${oldItem.default}\` to \`${newItem.default}\`.`
         );
+        this.jsonChanges.breakingChanges[componentTag].push({
+          api: itemType,
+          changeType: "defaultValue",
+          name: newItem.name,
+          oldValue: oldItem.default,
+          newValue: newItem.default,
+        });
         this._changes.breaking = true;
       }
       if (oldType !== newType) {
-        this.getTypeDiffLevel(itemType === 'methods')[componentTag].push(
+        this.getTypeDiffLevel(itemType === "methods")[componentTag].push(
           `The type for "${newItem.name}" has changed from \`${oldType}\` to \`${newType}\`.`
         );
+        this.jsonChanges.breakingChanges[componentTag].push({
+          api: itemType,
+          changeType: "type",
+          name: newItem.name,
+          oldValue: oldType,
+          newValue: newType,
+        });
         this._changes.breaking = true;
       }
       if (oldItem.fieldName !== newItem.fieldName) {
         this.breakingChanges[componentTag].push(
           `The field name for ${itemType} "${newItem.name}" has changed from \`${oldItem.fieldName}\` to \`${newItem.fieldName}\`.`
         );
+        this.jsonChanges.breakingChanges[componentTag].push({
+          api: itemType,
+          changeType: "name",
+          name: newItem.name,
+          oldValue: oldItem.fieldName,
+          newValue: newItem.fieldName,
+        });
         this._changes.breaking = true;
       }
     });

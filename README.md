@@ -9,6 +9,7 @@ A utility for detecting changes between different versions of Custom Elements Ma
 - Analyze property, method, event, CSS variable, and CSS part changes
 - Configurable behavior for handling type changes and default value changes
 - Comprehensive change reports organized by component
+- Provides human readable output and raw data for custom usage
 
 ## Use Cases
 
@@ -17,14 +18,18 @@ A utility for detecting changes between different versions of Custom Elements Ma
 - Help consumers understand the impact of updating to a new version
 - Document API changes in a structured format
 
-
 ## Installation
 
 ```bash
-npm install @wc-toolkit/changelog
+npm install -D @wc-toolkit/changelog
 ```
 
 ## Usage
+
+The package provides results in two formats:
+
+- In a human readable format
+- As a JSON object
 
 ```typescript
 import { CemChangelog } from "@wc-toolkit/changelog";
@@ -37,9 +42,100 @@ const detector = new CemChangelog();
 // Compare two manifests
 const changes = detector.compareManifests(oldManifest, newManifest);
 
-// The changes object contains two main sections:
-console.log(changes.breakingChanges); // Breaking changes by component
-console.log(changes.featureChanges); // New features by component
+// The changes object contains two main sections - `changelog` and `rawData`
+
+// Displays the changes in a human readable format
+console.log(changes.changelog.breakingChanges); // Breaking changes by component
+console.log(changes.changelog.featureChanges); // New features by component
+
+// Displays the changes in JSON format
+console.log(changes.rawData.breakingChanges); // Breaking changes by component
+console.log(changes.rawData.featureChanges); // New features by component
+```
+
+## Example Output
+
+Changelog output
+
+```json
+{
+  "breakingChanges": {
+    "my-component": [
+      "The following properties have been removed: `oldProp`",
+      "The type for \"prop\" has changed from `string` to `number`",
+      "The following methods have been removed: `oldMethod1`, `oldMethod2`"
+    ],
+    "old-component": ["This component has been removed in the new manifest"]
+  },
+  "featureChanges": {
+    "my-component": [
+      "The following properties have been added: `newProp`",
+      "The following methods have been added: `newMethod`"
+    ],
+    "new-component": ["This component has been added in the new manifest"]
+  }
+}
+```
+
+Raw data output:
+
+```json
+{
+  "breakingChanges": {
+    "my-component": [
+      {
+        "api": "properties",
+        "changeType": "type",
+        "name": "prop",
+        "oldValue": "string",
+        "newValue": "number"
+      },
+      {
+        "api": "methods",
+        "changeType": "removed",
+        "name": "oldMethod"
+      },
+      {
+        "api": "CSS variables",
+        "changeType": "removed",
+        "name": "--color"
+      },
+    ],
+    "old-component": [
+      {
+        "api": "component",
+        "changeType": "removed",
+        "name": "OldComponent"
+      }
+    ]
+  },
+  "featureChanges": {
+    "my-component": [
+      {
+        "api": "properties",
+        "changeType": "added",
+        "name": "newProp"
+      },
+      {
+        "api": "methods",
+        "changeType": "added",
+        "name": "newMethod"
+      },
+      {
+        "api": "CSS states",
+        "changeType": "added",
+        "name": "invalid"
+      }
+    ],
+    "new-component": [
+      {
+        "api": "component",
+        "changeType": "added",
+        "name": "NewComponent"
+      }
+    ]
+  }
+}
 ```
 
 ## Configuration Options
@@ -56,6 +152,9 @@ const detector = new CemChangelog({
 
   // Include deprecation messages in the output
   includeDeprecationMessages: true,
+
+  // Specify what property your types can be found in
+  typeSrc: 'paredType'
 });
 ```
 
@@ -65,6 +164,9 @@ const detector = new CemChangelog({
 
 - Added components (feature)
 - Removed components (breaking)
+- Changes in module path (breaking)
+- Changes in definition path (breaking)
+- Changes in type definition path (breaking)
 
 ### Property Changes
 
@@ -72,7 +174,7 @@ const detector = new CemChangelog({
 - Removed properties (breaking)
 - Type changes (breaking by default, configurable)
 - Default value changes (breaking by default, configurable)
-- Deprecation status changes (feature, include more info when configured)
+- Deprecation status changes (feature, includes more info when configured)
 
 ### Method Changes
 
@@ -84,7 +186,7 @@ const detector = new CemChangelog({
 
 - Added CSS variables (feature)
 - Removed CSS variables (breaking)
-- CSS variable default value changes (breaking)
+- CSS variable default value changes (breaking by default, configurable)
 - Added CSS parts (feature)
 - Removed CSS parts (breaking)
 - Added CSS states (features)
@@ -94,30 +196,4 @@ const detector = new CemChangelog({
 
 - Added events (feature)
 - Removed events (breaking)
-- Event type changes (breaking)
-
-## Example Output
-
-```javascript
-{
-  breakingChanges: {
-    "my-component": [
-      "The following properties have been removed: `oldProp`",
-      "The type for \"prop\" has changed from `string` to `number`",
-      "The following methods have been removed: `oldMethod`"
-    ],
-    "removed-component": [
-      "This component has been removed in the new manifest"
-    ]
-  },
-  featureChanges: {
-    "my-component": [
-      "The following properties have been added: `newProp`",
-      "The following methods have been added: `newMethod`"
-    ],
-    "new-component": [
-      "This component has been added in the new manifest"
-    ]
-  }
-}
-```
+- Event type changes (breaking by default, configurable)

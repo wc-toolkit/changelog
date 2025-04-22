@@ -15,8 +15,8 @@ describe("CemChangelog", () => {
       );
       console.log(JSON.stringify(differences));
 
-      expect(Object.keys(differences.breakingChanges).length).toBe(0);
-      expect(Object.keys(differences.featureChanges).length).toBe(0);
+      expect(Object.keys(differences.changelog.breakingChanges).length).toBe(0);
+      expect(Object.keys(differences.changelog.featureChanges).length).toBe(0);
     });
 
     test("should throw error for missing manifests", () => {
@@ -81,10 +81,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.featureChanges).toHaveProperty("new-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("new-component");
       expect(
-        differences.featureChanges["new-component"].some((x) =>
+        differences.changelog.featureChanges["new-component"].some((x) =>
           x.includes("has been added")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["new-component"].some((x) =>
+          x.api === 'component' && x.changeType === 'added'
         )
       ).toBeTruthy();
     });
@@ -131,10 +136,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("old-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("old-component");
       expect(
-        differences.breakingChanges["old-component"].some((x) =>
+        differences.changelog.breakingChanges["old-component"].some((x) =>
           x.includes("has been removed")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["old-component"].some((x) =>
+          x.api === 'component' && x.changeType === 'removed'
         )
       ).toBeTruthy();
     });
@@ -193,14 +203,19 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("properties have been added")
         )
       ).toBeTruthy();
       expect(
-        differences.featureChanges["test-component"][0].includes("newProp")
+        differences.changelog.featureChanges["test-component"][0].includes("newProp")
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'added'
+        )
       ).toBeTruthy();
     });
 
@@ -254,15 +269,20 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("properties have been removed")
         )
       ).toBeTruthy();
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("oldProp")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'removed'
         )
       ).toBeTruthy();
     });
@@ -308,10 +328,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("The type for \"prop\" has changed from")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'type'
         )
       ).toBeTruthy();
     });
@@ -360,15 +385,20 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("methods have been added")
         )
       ).toBeTruthy();
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("newMethod")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["test-component"].some((x) =>
+          x.api === 'methods' && x.changeType === 'added'
         )
       ).toBeTruthy();
     });
@@ -413,15 +443,20 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("methods have been removed")
         )
       ).toBeTruthy();
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("oldMethod")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'methods' && x.changeType === 'removed'
         )
       ).toBeTruthy();
     });
@@ -481,10 +516,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("The type for \"testMethod\" has changed from ")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'methods' && x.changeType === 'type'
         )
       ).toBeTruthy();
     });
@@ -536,11 +576,16 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).not.toHaveProperty("test-component");
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).not.toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("The type for \"prop\" has changed from")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'type'
         )
       ).toBeTruthy();
     });
@@ -590,11 +635,16 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).not.toHaveProperty("test-component");
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).not.toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("The default value for properties \"prop\" has changed")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'defaultValue'
         )
       ).toBeTruthy();
     });
@@ -646,10 +696,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("Use newProp instead")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["test-component"].some((x) =>
+          x.api === 'properties' && x.changeType === 'deprecation'
         )
       ).toBeTruthy();
     });
@@ -698,21 +753,26 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
 
       // Check default value change
 
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes('The default value for CSS variables "--color" has changed')
         )
       ).toBeTruthy();
 
       // Check added variable
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("The following CSS variables have been added: `--size`")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["test-component"].some((x) =>
+          x.api === 'CSS variables' && x.changeType === 'added'
         )
       ).toBeTruthy();
     });
@@ -756,30 +816,35 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
-      expect(differences.featureChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.featureChanges).toHaveProperty("test-component");
 
       // Check removed part
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("CSS parts have been removed")
         )
       ).toBeTruthy();
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes("button")
         )
       ).toBeTruthy();
 
       // Check added part
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("CSS parts have been added")
         )
       ).toBeTruthy();
       expect(
-        differences.featureChanges["test-component"].some((x) =>
+        differences.changelog.featureChanges["test-component"].some((x) =>
           x.includes("container")
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.featureChanges["test-component"].some((x) =>
+          x.api === 'CSS parts' && x.changeType === 'added'
         )
       ).toBeTruthy();
     });
@@ -829,10 +894,15 @@ describe("CemChangelog", () => {
 
       const differences = checker.compareManifests(oldManifest, newManifest);
 
-      expect(differences.breakingChanges).toHaveProperty("test-component");
+      expect(differences.changelog.breakingChanges).toHaveProperty("test-component");
       expect(
-        differences.breakingChanges["test-component"].some((x) =>
+        differences.changelog.breakingChanges["test-component"].some((x) =>
           x.includes('The type for "change" has changed from')
+        )
+      ).toBeTruthy();
+      expect(
+        differences.rawData.breakingChanges["test-component"].some((x) =>
+          x.api === 'events' && x.changeType === 'type'
         )
       ).toBeTruthy();
     });
