@@ -1,6 +1,6 @@
 <div align="center">
   
-![workbench with tools, html, css, javascript, and download icon](https://raw.githubusercontent.com/wc-toolkit/cem-validator/refs/heads/main/assets/wc-toolkit_cem-validator.png)
+![workbench with tools, html, css, javascript, and changelog icon](https://raw.githubusercontent.com/wc-toolkit/changelog/refs/heads/main/assets/wc-toolkit_changelog.png)
 
 </div>
 
