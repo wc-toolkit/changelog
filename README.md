@@ -180,7 +180,7 @@ const detector = new CemChangelog({
 
 - Added methods (feature)
 - Removed methods (breaking)
-- Changes in method signature
+- Changes in method signature (breaking)
 
 ### CSS-Related Changes
 
