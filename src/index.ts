@@ -30,8 +30,8 @@ export type ChangeMetadata = {
     | "added"
     | "removed";
   name?: string;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: string | boolean;
+  newValue?: string | boolean;
 };
 
 export type NaturalLanguageChangeList = {
@@ -42,6 +42,11 @@ export type NaturalLanguageChangeList = {
 export type RawDataChangeList = {
   breakingChanges: Record<string, ChangeMetadata[]>;
   featureChanges: Record<string, ChangeMetadata[]>;
+};
+
+export type CemChangelogResult = {
+  changelog: NaturalLanguageChangeList;
+  rawData: RawDataChangeList;
 };
 
 const defaultConfig: CemChangelogConfig = {
@@ -68,7 +73,7 @@ export class CemChangelog {
     this.config = { ...defaultConfig, ...config };
   }
 
-  public compareManifests(oldManifest: unknown, newManifest: unknown) {
+  public compareManifests(oldManifest: unknown, newManifest: unknown): CemChangelogResult {
     if (!oldManifest || !newManifest) {
       throw new Error("Both old and new manifests must be provided.");
     }
@@ -137,17 +142,6 @@ export class CemChangelog {
     return this.config.defaultValuesAsNonBreaking
       ? this.featureChanges
       : this.breakingChanges;
-  }
-
-  private getChangeList(
-    changeType: "type" | "defaultValue"
-  ): Record<string, string[]> {
-    const config = {
-      type: this.config.typeChangesAsNonBreaking,
-      defaultValue: this.config.defaultValuesAsNonBreaking,
-    };
-
-    return config[changeType] ? this.featureChanges : this.breakingChanges;
   }
 
   private getDeprecationMessage(deprecated?: boolean | string) {
@@ -576,17 +570,6 @@ export class CemChangelog {
         this._changes.breaking = true;
       }
     });
-
-    // if (checkSpecificFields) {
-    //   const oldItemMap = new Map(oldItems.map((item) => [item.name, item]));
-
-    //   newItems.forEach((newItem) => {
-    //     const oldItem = oldItemMap.get(newItem.name);
-    //     if (oldItem) {
-    //       checkSpecificFields(oldItem, newItem);
-    //     }
-    //   });
-    // }
   }
 
   private getTypeText(item: any): string {

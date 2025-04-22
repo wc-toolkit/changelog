@@ -1,3 +1,9 @@
+<div align="center">
+  
+![workbench with tools, html, css, javascript, and download icon](https://raw.githubusercontent.com/wc-toolkit/cem-validator/refs/heads/main/assets/wc-toolkit_cem-validator.png)
+
+</div>
+
 # WC Toolkit - Changelog
 
 A utility for detecting changes between different versions of Custom Elements Manifest (CEM) files, helping library authors and consumers understand breaking changes and new features between releases.
@@ -99,7 +105,7 @@ Raw data output:
         "api": "CSS variables",
         "changeType": "removed",
         "name": "--color"
-      },
+      }
     ],
     "old-component": [
       {
@@ -138,6 +144,42 @@ Raw data output:
 }
 ```
 
+The response will be returned based on the following types:
+
+```ts
+type CemChangelogResult = {
+  changelog: NaturalLanguageChangeList;
+  rawData: RawDataChangeList;
+};
+
+type NaturalLanguageChangeList = {
+  breakingChanges: Record<string, string[]>;
+  featureChanges: Record<string, string[]>;
+};
+
+type RawDataChangeList = {
+  breakingChanges: Record<string, ChangeMetadata[]>;
+  featureChanges: Record<string, ChangeMetadata[]>;
+};
+
+type ChangeMetadata = {
+  api: string;
+  changeType:
+    | "type"
+    | "defaultValue"
+    | "deprecation"
+    | "name"
+    | "modulePath"
+    | "definitionPath"
+    | "typeDefinitionPath"
+    | "added"
+    | "removed";
+  name?: string;
+  oldValue?: string | boolean;
+  newValue?: string | boolean;
+};
+```
+
 ## Configuration Options
 
 You can customize the behavior of the change detector by passing configuration options:
@@ -150,11 +192,11 @@ const detector = new CemChangelog({
   // Treat default value changes as features instead of breaking changes
   defaultValuesAsNonBreaking: true,
 
-  // Include deprecation messages in the output
+  // Include deprecation messages in the output message
   includeDeprecationMessages: true,
 
   // Specify what property your types can be found in
-  typeSrc: 'paredType'
+  typeSrc: "paredType",
 });
 ```
 
