@@ -239,3 +239,13 @@ const detector = new CemChangelog({
 - Added events (feature)
 - Removed events (breaking)
 - Event type changes (breaking by default, configurable)
+
+
+<div style="text-align: center; margin-top: 32px;">
+  <a href="https://stackblitz.com/edit/stackblitz-starters-psw6yz7i?file=index.js,README.md" target="_blank">
+    <img
+      alt="Open in StackBlitz"
+      src="https://developer.stackblitz.com/img/open_in_stackblitz.svg"
+    />
+  </a>
+</div>
