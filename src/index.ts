@@ -64,11 +64,6 @@ export class CemChangelog {
     featureChanges: {},
   };
 
-  private _changes = {
-    breaking: false,
-    feature: false,
-  };
-
   constructor(config: CemChangelogConfig = {}) {
     this.config = { ...defaultConfig, ...config };
   }
@@ -196,7 +191,6 @@ export class CemChangelog {
         changeType: "removed",
         name: this.oldComponents.get(tagName)?.name,
       });
-      this._changes.breaking = true;
     });
   }
 
@@ -219,7 +213,6 @@ export class CemChangelog {
         changeType: "added",
         name: this.newComponents.get(tagName)?.name,
       });
-      this._changes.feature = true;
     });
   }
 
@@ -244,7 +237,6 @@ export class CemChangelog {
         oldValue: oldComponent.name,
         newValue: newComponent.name,
       });
-      this._changes.breaking = true;
     }
 
     if (oldComponent.modulePath !== newComponent.modulePath) {
@@ -260,7 +252,6 @@ export class CemChangelog {
         oldValue: oldComponent.modulePath,
         newValue: newComponent.modulePath,
       });
-      this._changes.breaking = true;
     }
 
     if (oldComponent.definitionPath !== newComponent.definitionPath) {
@@ -276,7 +267,6 @@ export class CemChangelog {
         oldValue: oldComponent.definitionPath,
         newValue: newComponent.definitionPath,
       });
-      this._changes.breaking = true;
     }
 
     if (oldComponent.typeDefinitionPath !== newComponent.typeDefinitionPath) {
@@ -292,7 +282,6 @@ export class CemChangelog {
         oldValue: oldComponent.typeDefinitionPath,
         newValue: newComponent.typeDefinitionPath,
       });
-      this._changes.breaking = true;
     }
 
     if (oldComponent.deprecated !== newComponent.deprecated) {
@@ -307,7 +296,6 @@ export class CemChangelog {
         oldValue: oldComponent.deprecated,
         newValue: newComponent.deprecated,
       });
-      this._changes.feature = true;
     }
   }
 
@@ -489,7 +477,6 @@ export class CemChangelog {
           name: item.name,
         });
       });
-      this._changes.feature = true;
     }
 
     if (removedItems.length > 0) {
@@ -505,7 +492,6 @@ export class CemChangelog {
           name: item.name,
         });
       });
-      this._changes.breaking = true;
     }
 
     newItems.forEach((newItem) => {
@@ -528,7 +514,6 @@ export class CemChangelog {
           oldValue: oldItem.deprecated,
           newValue: newItem.deprecated,
         });
-        this._changes.feature = true;
       }
       if (oldItem.default !== newItem.default) {
         this.getDefaultValueDiffLevel()[componentTag].push(
@@ -541,7 +526,6 @@ export class CemChangelog {
           oldValue: oldItem.default,
           newValue: newItem.default,
         });
-        this._changes.breaking = true;
       }
       if (oldType !== newType) {
         this.getTypeDiffLevel(itemType === "methods")[componentTag].push(
@@ -554,7 +538,6 @@ export class CemChangelog {
           oldValue: oldType,
           newValue: newType,
         });
-        this._changes.breaking = true;
       }
       if (oldItem.fieldName !== newItem.fieldName) {
         this.breakingChanges[componentTag].push(
@@ -567,7 +550,6 @@ export class CemChangelog {
           oldValue: oldItem.fieldName,
           newValue: newItem.fieldName,
         });
-        this._changes.breaking = true;
       }
     });
   }
