@@ -1,6 +1,6 @@
 {
   "name": "@wc-toolkit/changelog",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tool to detect changes between two version of a web component package using the Custom Elements Manifest.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
